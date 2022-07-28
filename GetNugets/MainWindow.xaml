@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GetNugets"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" KeyUp="Window_KeyUp">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -23,6 +23,7 @@
             <Button x:Name="btnBrowse" Content="Browse Sln" Click="btnBrowse_Click" Margin="5 2"/>
             <Button x:Name="btnShowPackages" Content="Get Packages Info" Click="btnShowPackages_Click" Margin="5 2"/>
             <Button x:Name="btnGetPackages" Content="Get Packages" Click="btnGetPackages_Click"  Margin="5 2"/>
+            <CheckBox x:Name="ChBoxVersion" Content="Version" Margin="5 2" IsChecked="{Binding GetVersion, Mode=TwoWay}"/>
         </StackPanel>
         <TextBox x:Name="Output" Text="-"
                  Grid.Row="1"

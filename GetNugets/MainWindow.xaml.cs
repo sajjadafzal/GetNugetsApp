@@ -22,13 +22,30 @@ namespace GetNugets
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         string? SolutionFolderPath;
         List<NugetPackage> packages;
         NugetPackage? CurrentPackage;
+        
 
-       public MainWindow()
+        private bool _GetVersion = false;
+
+        public bool GetVersion
+        {
+            get => _GetVersion;
+            set 
+            {
+                _GetVersion = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GetVersion)));
+            }
+        }
+
+        bool IsInProcess = false;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public MainWindow()
         {
             InitializeComponent();
             packages = new List<NugetPackage>();
@@ -90,20 +107,26 @@ namespace GetNugets
 
         private async void btnGetPackages_Click(object sender, RoutedEventArgs e)
         {
-
+            IsInProcess = true;
             foreach (NugetPackage package in packages)
             {
                 if (package.Select)
                 {
-                    await GetNugetPackageAsync(package);
+                    await GetNugetPackageAsync(package, GetVersion);
                     Output.Text = package.Output;
                     Status.Text = package.Error;
                 }
+                if (!IsInProcess)
+                {
+                    Status.Text = "Process has been cancelled";
+                    break;
+                }
             }
+            IsInProcess = false;
         }
 
 
-        private async Task GetNugetPackageAsync(NugetPackage package)
+        private async Task GetNugetPackageAsync(NugetPackage package, bool getVersion)
         {
             await Task.Run(() =>
             {
@@ -113,10 +136,13 @@ namespace GetNugets
                     nugetStartInfo.FileName = "nuget.exe";
                     nugetStartInfo.RedirectStandardOutput = true;
                     nugetStartInfo.RedirectStandardError = true;
-                    nugetStartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    nugetStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    nugetStartInfo.CreateNoWindow = true;
                     nugetProcess.StartInfo = nugetStartInfo;
-
-                    nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory C:\packages";
+                    if (getVersion)
+                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory D:\NugetPackages";
+                    else
+                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory D:\NugetPackages";
                     //nugetStartInfo.RedirectStandardOutput = true;
                     nugetProcess.EnableRaisingEvents = true;
                     nugetProcess.Exited += (o, e) =>
@@ -146,6 +172,14 @@ namespace GetNugets
             Output.Text = pkg?.Output;
             Status.Text = pkg?.Error;
 
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                IsInProcess = false;
+            }
         }
     }
 }
