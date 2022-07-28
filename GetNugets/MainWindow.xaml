@@ -1,0 +1,76 @@
+﻿<Window x:Class="GetNugets.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GetNugets"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="4*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="2 5">
+            <Button x:Name="btnBrowse" Content="Browse Sln" Click="btnBrowse_Click" Margin="5 2"/>
+            <Button x:Name="btnShowPackages" Content="Get Packages Info" Click="btnShowPackages_Click" Margin="5 2"/>
+            <Button x:Name="btnGetPackages" Content="Get Packages" Click="btnGetPackages_Click"  Margin="5 2"/>
+        </StackPanel>
+        <TextBox x:Name="Output" Text="-"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 TextAlignment="Left"
+                 Margin="5 2 2 2"
+                 />
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   x:Name="Status" Text="-"
+                   TextAlignment="Left"
+                   Margin="5 2 2 2"/>
+        <ListView Grid.Row="1"
+                  Grid.Column="2"
+                  x:Name="Packagelist"
+                  SelectionChanged="Packagelist_SelectionChanged"
+                  >
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding Package}" Header="Package Name" >
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Version}" Header="Version" Width="75"/>
+                    <GridViewColumn Header="Select">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Select, Mode=TwoWay}" Margin="5 0" MinWidth="50"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Exited">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Exited, Mode=TwoWay}" Margin="5 0" MinWidth="50"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+
+            <!--<ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Package}"/>
+                        <TextBlock Text="{Binding Version}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>-->
+        </ListView>
+    </Grid>
+</Window>
