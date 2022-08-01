@@ -54,7 +54,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Exited">
+                    <GridViewColumn Header="Completed">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding Exited, Mode=TwoWay}" Margin="5 0" MinWidth="50"/>
