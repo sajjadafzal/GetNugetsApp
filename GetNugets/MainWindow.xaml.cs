@@ -25,7 +25,7 @@ namespace GetNugets
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         string? SolutionFolderPath;
-        List<NugetPackage> packages;
+        List<NugetPackage> packages { get; set; }
         NugetPackage? CurrentPackage;
         
 
@@ -180,6 +180,16 @@ namespace GetNugets
             {
                 IsInProcess = false;
             }
+        }       
+
+        private void ChBoxVersion_Checked(object sender, RoutedEventArgs e)
+        {
+            GetVersion = true;
+        }
+
+        private void ChBoxVersion_Unchecked(object sender, RoutedEventArgs e)
+        {
+            GetVersion = false;
         }
     }
 }
