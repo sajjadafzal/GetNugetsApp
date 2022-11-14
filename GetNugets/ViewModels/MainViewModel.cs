@@ -1,76 +1,53 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Ookii.Dialogs.Wpf;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using Ookii.Dialogs.Wpf;
+using CommunityToolkit.Mvvm.Input;
+using System.Diagnostics;
 
-namespace GetNugets
+namespace GetNugets.ViewModels
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window//, INotifyPropertyChanged
+    public partial class MainViewModel : ViewModelBase
     {
         string? SolutionFolderPath;
-        List<NugetPackage> packages { get; set; }
-        NugetPackage? CurrentPackage;
-        
+        ObservableCollection<NugetPackage> packages { get; set; }
 
-        private bool _GetVersion = false;
+        [ObservableProperty]
+        private bool forceVersion = false;
 
-        public bool GetVersion
-        {
-            get => _GetVersion;
-            set 
-            {
-                _GetVersion = value;
-                //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GetVersion)));
-            }
-        }
+        [ObservableProperty]
+        private string statusInfo = "-";
 
-        bool IsInProcess = false;
+        [ObservableProperty]
+        private string outputText = "";
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public MainWindow()
-        {
-            InitializeComponent();
-            packages = new List<NugetPackage>();
-        }
-
-        private void btnBrowse_Click(object sender, RoutedEventArgs e)
+        [RelayCommand]
+        private void Browse()
         {
             VistaFolderBrowserDialog FolderDialog = new VistaFolderBrowserDialog();
             FolderDialog.Description = "Select a Solution Folder";
             FolderDialog.UseDescriptionForTitle = true;
             if (!VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
             {
-                MessageBox.Show(this, "Because you are not using Windows Vista or later, the regular folder browser dialog will be used. Please use Windows Vista to see the new dialog.", "Sample folder browser dialog");
+                MessageBox.Show("Because you are not using Windows Vista or later, the regular folder browser dialog will be used. Please use Windows Vista to see the new dialog.", "Sample folder browser dialog");
             }
 
-            if ((bool)FolderDialog.ShowDialog(this)!)
+            if ((bool)FolderDialog.ShowDialog()!)
             {
                 SolutionFolderPath = FolderDialog.SelectedPath;
-                Status.Text = "Selected Folder: " + SolutionFolderPath;
+                StatusInfo = "Selected Folder: " + SolutionFolderPath;
             }
         }
 
-        private void btnShowPackages_Click(object sender, RoutedEventArgs e)
+        [RelayCommand]
+        private void ShowPackages()
         {
-            Packagelist.ItemsSource = null;
             packages.Clear();
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -83,12 +60,12 @@ namespace GetNugets
             process.StartInfo = startInfo;
             process.Start();
             string commandOutput = process.StandardOutput.ReadToEnd();
-            Status.Text = process.StandardError.ReadToEnd();
-            Output.Text = commandOutput;
+            StatusInfo = process.StandardError.ReadToEnd();
+            outputText = commandOutput;
 
             string[] commandOutputs = commandOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach(string str in commandOutputs)
+            foreach (string str in commandOutputs)
             {
                 if (str.Contains(">"))
                 {
@@ -98,33 +75,28 @@ namespace GetNugets
                 }
             }
             
-            Packagelist.ItemsSource = packages;
-
-            
-            
-
         }
 
-        private async void btnGetPackages_Click(object sender, RoutedEventArgs e)
+        [RelayCommand]
+        private async void GetPackages()
         {
-            IsInProcess = true;
+            //IsInProcess = true;
             foreach (NugetPackage package in packages)
             {
                 if (package.Select)
                 {
-                    await GetNugetPackageAsync(package, GetVersion);
-                    Output.Text = package.Output;
-                    Status.Text = package.Error;
+                    await GetNugetPackageAsync(package, ForceVersion);
+                    outputText = package.Output;
+                    StatusInfo = package.Error;
                 }
                 if (!IsInProcess)
                 {
-                    Status.Text = "Process has been cancelled";
+                    StatusInfo = "Process has been cancelled";
                     break;
                 }
             }
-            IsInProcess = false;
+            //IsInProcess = false;
         }
-
 
         private async Task GetNugetPackageAsync(NugetPackage package, bool getVersion)
         {
@@ -163,33 +135,8 @@ namespace GetNugets
                     //Status.Text += " " + nugetProcess.ExitCode.ToString();
                     //return package;
                 }
-            });           
-            
-        }
-        private void Packagelist_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            NugetPackage? pkg = Packagelist.SelectedItem as NugetPackage;
-            Output.Text = pkg?.Output;
-            Status.Text = pkg?.Error;
+            });
 
-        }
-
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                IsInProcess = false;
-            }
-        }       
-
-        private void ChBoxVersion_Checked(object sender, RoutedEventArgs e)
-        {
-            GetVersion = true;
-        }
-
-        private void ChBoxVersion_Unchecked(object sender, RoutedEventArgs e)
-        {
-            GetVersion = false;
         }
     }
 }
