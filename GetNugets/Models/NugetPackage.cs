@@ -19,14 +19,14 @@ public partial class NugetPackage : ViewModelBase
     public string Output { get; set; }
 
     [ObservableProperty]
-    private bool exited;    
+    private bool existed;    
 
     public NugetPackage(string package, string version)
     {
         Package = package;
         Version = version;
         Select = true;
-        Exited = false;
+        Existed = false;
         Error = string.Empty;
         Output = string.Empty;
     }

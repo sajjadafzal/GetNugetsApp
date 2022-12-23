@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GetNugets.Views;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -12,6 +13,7 @@ namespace GetNugets
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
-    {
+    {       
+
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GetNugets
 {
-    internal class NugetPackage : INotifyPropertyChanged
+    public class NugetPackage : INotifyPropertyChanged
     {
         public string Package { get; set; }
         public string Version { get; set; }
@@ -16,17 +16,17 @@ namespace GetNugets
         public string Error { get; set; }
         public string Output { get; set; }
 
-        private bool exited;
+        private bool existed;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public bool Exited 
+        public bool Existed 
         { 
-            get => exited; 
+            get => existed; 
             set 
             {
-                exited = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Exited)));
+                existed = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Existed)));
             } 
         }
 
@@ -35,7 +35,7 @@ namespace GetNugets
             Package = package;
             Version = version;
             Select = true;
-            Exited = false;
+            Existed = false;
             Error = string.Empty;
             Output = string.Empty;
         }

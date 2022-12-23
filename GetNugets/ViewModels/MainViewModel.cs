@@ -16,7 +16,7 @@ namespace GetNugets.ViewModels
     public partial class MainViewModel : ViewModelBase
     {
         string? SolutionFolderPath;
-        ObservableCollection<NugetPackage> packages { get; set; }
+        public ObservableCollection<NugetPackage> packages { get; set; }
 
         [ObservableProperty]
         private bool forceVersion = false;
@@ -26,6 +26,17 @@ namespace GetNugets.ViewModels
 
         [ObservableProperty]
         private string outputText = "";
+
+        [ObservableProperty]
+        private bool isVersionChecked = false;
+
+
+        bool IsInProcess = false;
+
+        public MainViewModel()
+        {
+            packages = new ObservableCollection<NugetPackage>();
+        }
 
         [RelayCommand]
         private void Browse()
@@ -121,7 +132,7 @@ namespace GetNugets.ViewModels
                     {
                         Process? p = o as Process;
                         if (p.ExitCode == 0)
-                            package.Exited = true;
+                            package.Existed = true;
                     };
                     //nugetProcess.OutputDataReceived += (o, e) =>
                     //{

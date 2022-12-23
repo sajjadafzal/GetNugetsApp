@@ -9,5 +9,9 @@ namespace GetNugets.ViewModels
 {
     public class ViewModelBase : ObservableObject
     {
+        public virtual void Dispose()
+        {
+
+        }
     }
 }
