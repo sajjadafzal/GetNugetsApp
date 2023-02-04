@@ -14,7 +14,7 @@
     </UserControl.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
+            <RowDefinition Height="50" />
             <RowDefinition />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
@@ -23,10 +23,19 @@
             <ColumnDefinition Width="4*" />
             <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
+        <Menu Grid.Row="0" Grid.Column="0">
+            <MenuItem Header="File">
+                <MenuItem Header="Select Nuget Folder" Command="{Binding BrowseNugetFolderCommand}"/>
+            </MenuItem>
+        </Menu>
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+            <TextBlock Text="Nugets Output Folder: " VerticalAlignment="Center" FontSize="14" Foreground="Purple" FontWeight="Bold"/>
+            <TextBlock Text="{Binding NugetFolder}" Margin="5,0,0,0" VerticalAlignment="Center" FontSize="14" FontWeight="Bold" Background="Purple" Foreground="White" Padding="10"/>
+        </StackPanel>
         <StackPanel
             Grid.Row="1"
             Grid.Column="0"
-            Margin="2,5">
+            Margin="10,25,0,2">
             <Button
                 x:Name="btnBrowse"
                 Margin="5,2"
@@ -58,7 +67,7 @@
             Margin="5,2,2,2"
             Background="LightSlateGray"
             Foreground="White"
-            Text="-"
+            Text="{Binding OutputText}"
             TextAlignment="Left" />
         <TextBlock
             x:Name="Status"
@@ -67,7 +76,7 @@
             Grid.ColumnSpan="2"
             Margin="5,2,2,2"
             Background="LightGray"
-            Text="-"
+            Text="{Binding StatusInfo}"
             TextAlignment="Left" />
         <ListView
             x:Name="Packagelist"
@@ -78,7 +87,7 @@
                 <GridView>
                     <GridViewColumn DisplayMemberBinding="{Binding Package}" Header="Package Name"/>
                     <GridViewColumn
-                        Width="75"
+                        Width="150"
                         DisplayMemberBinding="{Binding Version}"
                         Header="Version" />
                     <GridViewColumn Header="Select">

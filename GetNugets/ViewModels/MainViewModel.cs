@@ -10,12 +10,21 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
+using System.IO;
+using GetNugets.Models;
+using System.Text.Json;
 
 namespace GetNugets.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
         string? SolutionFolderPath;
+
+        private string CurrentApplicationPath;
+
+        private AppSettings? CurrentAppSettings;
+
+        private string AppSettingsPath;
         public ObservableCollection<NugetPackage> packages { get; set; }
 
         [ObservableProperty]
@@ -30,15 +39,27 @@ namespace GetNugets.ViewModels
         [ObservableProperty]
         private bool isVersionChecked = false;
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(BrowseCommand))]
+        private string? nugetFolder;
 
         bool IsInProcess = false;
 
         public MainViewModel()
         {
             packages = new ObservableCollection<NugetPackage>();
+            CurrentApplicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            AppSettingsPath = @$"{CurrentApplicationPath}appsettings.json";
+            if (File.Exists(AppSettingsPath))
+            {
+                // appsettings.json exists
+                string jsonString = File.ReadAllText(AppSettingsPath);
+                CurrentAppSettings = JsonSerializer.Deserialize<AppSettings>(jsonString);
+                NugetFolder = CurrentAppSettings.NugetsFolder;
+            }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanBrowse))]
         private void Browse()
         {
             VistaFolderBrowserDialog FolderDialog = new VistaFolderBrowserDialog();
@@ -54,6 +75,34 @@ namespace GetNugets.ViewModels
                 SolutionFolderPath = FolderDialog.SelectedPath;
                 StatusInfo = "Selected Folder: " + SolutionFolderPath;
             }
+        }
+
+        [RelayCommand]
+        private void BrowseNugetFolder()
+        {
+            VistaFolderBrowserDialog FolderDialog = new VistaFolderBrowserDialog();
+            FolderDialog.Description = "Select a Folder for Nuget Packages";            
+            FolderDialog.UseDescriptionForTitle = true;
+            if (!VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
+            {
+                MessageBox.Show("Because you are not using Windows Vista or later, the regular folder browser dialog will be used. Please use Windows Vista to see the new dialog.", "Sample folder browser dialog");
+            }
+
+            if ((bool)FolderDialog.ShowDialog()!)
+            {
+              
+                NugetFolder = FolderDialog.SelectedPath;
+                StatusInfo = "Nugets Output Folder: " + NugetFolder;
+                (CurrentAppSettings??=new AppSettings()).NugetsFolder = NugetFolder;
+                JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize<AppSettings>(CurrentAppSettings, options);
+                File.WriteAllText(AppSettingsPath, jsonString);
+            }
+        }
+
+        private bool CanBrowse()
+        {
+            return !string.IsNullOrEmpty(NugetFolder);
         }
 
         [RelayCommand]
