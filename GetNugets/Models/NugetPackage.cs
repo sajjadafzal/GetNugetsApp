@@ -18,15 +18,11 @@ public partial class NugetPackage : ViewModelBase
     public string Error { get; set; }
     public string Output { get; set; }
 
-    [ObservableProperty]
-    private bool existed;    
-
     public NugetPackage(string package, string version)
     {
         Package = package;
         Version = version;
         Select = true;
-        Existed = false;
         Error = string.Empty;
         Output = string.Empty;
     }

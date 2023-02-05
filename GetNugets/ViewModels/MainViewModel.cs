@@ -18,14 +18,14 @@ namespace GetNugets.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
-        string? SolutionFolderPath;
-
-        private string CurrentApplicationPath;
+        private string? SolutionFolderPath;
 
         private AppSettings? CurrentAppSettings;
+        
+        private string CurrentApplicationPath;
 
         private string AppSettingsPath;
-        public ObservableCollection<NugetPackage> packages { get; set; }
+        public ObservableCollection<NugetPackageViewModel> packages { get; set; }
 
         [ObservableProperty]
         private bool forceVersion = false;
@@ -43,11 +43,14 @@ namespace GetNugets.ViewModels
         [NotifyCanExecuteChangedFor(nameof(BrowseCommand))]
         private string? nugetFolder;
 
+        [ObservableProperty]
+        private NugetPackageViewModel selectedPackage;
+
         bool IsInProcess = false;
 
         public MainViewModel()
         {
-            packages = new ObservableCollection<NugetPackage>();
+            packages = new ObservableCollection<NugetPackageViewModel>();
             CurrentApplicationPath = AppDomain.CurrentDomain.BaseDirectory;
             AppSettingsPath = @$"{CurrentApplicationPath}appsettings.json";
             if (File.Exists(AppSettingsPath))
@@ -130,7 +133,7 @@ namespace GetNugets.ViewModels
                 if (str.Contains(">"))
                 {
                     string[] subStr = str.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                    NugetPackage package = new NugetPackage(subStr[1], subStr[2]);
+                    NugetPackageViewModel package = new NugetPackageViewModel(subStr[1], subStr[2]);
                     packages.Add(package);
                 }
             }
@@ -140,13 +143,13 @@ namespace GetNugets.ViewModels
         [RelayCommand]
         private async void GetPackages()
         {
-            //IsInProcess = true;
-            foreach (NugetPackage package in packages)
+            IsInProcess = true;
+            foreach (NugetPackageViewModel package in packages)
             {
                 if (package.Select)
                 {
                     await GetNugetPackageAsync(package, ForceVersion);
-                    outputText = package.Output;
+                    OutputText = package.Output;
                     StatusInfo = package.Error;
                 }
                 if (!IsInProcess)
@@ -155,10 +158,10 @@ namespace GetNugets.ViewModels
                     break;
                 }
             }
-            //IsInProcess = false;
+            IsInProcess = false;
         }
 
-        private async Task GetNugetPackageAsync(NugetPackage package, bool getVersion)
+        private async Task GetNugetPackageAsync(NugetPackageViewModel package, bool getVersion)
         {
             await Task.Run(() =>
             {
@@ -172,16 +175,16 @@ namespace GetNugets.ViewModels
                     nugetStartInfo.CreateNoWindow = true;
                     nugetProcess.StartInfo = nugetStartInfo;
                     if (getVersion)
-                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory D:\NugetPackages";
+                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory {NugetFolder}";
                     else
-                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory D:\NugetPackages";
+                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory {NugetFolder}";
                     //nugetStartInfo.RedirectStandardOutput = true;
                     nugetProcess.EnableRaisingEvents = true;
                     nugetProcess.Exited += (o, e) =>
                     {
                         Process? p = o as Process;
                         if (p.ExitCode == 0)
-                            package.Existed = true;
+                            package.Exited= true;
                     };
                     //nugetProcess.OutputDataReceived += (o, e) =>
                     //{
@@ -191,12 +194,25 @@ namespace GetNugets.ViewModels
                     //nugetProcess.BeginOutputReadLine();
                     package.Output = nugetProcess.StandardOutput.ReadToEnd();
                     package.Error = nugetProcess.StandardError.ReadToEnd();
-                    nugetProcess.WaitForExit(3000);
+                    nugetProcess.WaitForExit();
                     //Status.Text += " " + nugetProcess.ExitCode.ToString();
                     //return package;
                 }
             });
 
+        }
+
+        [RelayCommand]
+        public void PackageSelectionChanged(NugetPackageViewModel newlySelectedPackage)
+        {
+            SelectedPackage= newlySelectedPackage;
+            OutputText = SelectedPackage.Output;
+        }
+
+        [RelayCommand]
+        public void EscapeKeyPressed()
+        {
+            IsInProcess = false;
         }
     }
 }

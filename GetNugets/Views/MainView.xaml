@@ -6,12 +6,19 @@
     xmlns:local="clr-namespace:GetNugets"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:GetNugets.ViewModels"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.DataContext>
         <viewmodels:MainViewModel />
     </UserControl.DataContext>
+    <UserControl.InputBindings>
+        <KeyBinding
+            Key="Esc"
+            Command="{Binding EscapeKeyPressedCommand}"
+            />
+    </UserControl.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
@@ -68,7 +75,7 @@
             Background="LightSlateGray"
             Foreground="White"
             Text="{Binding OutputText}"
-            TextAlignment="Left" />
+            TextAlignment="Left" Padding="15"/>
         <TextBlock
             x:Name="Status"
             Grid.Row="2"
@@ -82,7 +89,12 @@
             x:Name="Packagelist"
             Grid.Row="1"
             Grid.Column="2"
-            ItemsSource="{Binding packages}">
+            ItemsSource="{Binding packages}" Margin="15,0,0,0">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding PackageSelectionChangedCommand}" CommandParameter="{Binding ElementName=Packagelist, Path=SelectedItem}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
             <ListView.View>
                 <GridView>
                     <GridViewColumn DisplayMemberBinding="{Binding Package}" Header="Package Name"/>
