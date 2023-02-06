@@ -9,21 +9,19 @@ using System.Threading.Tasks;
 
 namespace GetNugets.Models;
 
-public partial class NugetPackage : ViewModelBase
+public partial class NugetPackage
 {
     public string Package { get; set; }
     public string Version { get; set; }
-    public bool Select { get; set; }
 
-    public string Error { get; set; }
-    public string Output { get; set; }
-
+    public NugetPackage()
+    {
+        Package = string.Empty;
+        Version = string.Empty;
+    }
     public NugetPackage(string package, string version)
     {
         Package = package;
         Version = version;
-        Select = true;
-        Error = string.Empty;
-        Output = string.Empty;
     }
 }

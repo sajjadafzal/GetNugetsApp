@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using GetNugets.Models;
 using System.Text.Json;
+using GetNugets.Services;
 
 namespace GetNugets.ViewModels
 {
@@ -56,8 +57,7 @@ namespace GetNugets.ViewModels
             if (File.Exists(AppSettingsPath))
             {
                 // appsettings.json exists
-                string jsonString = File.ReadAllText(AppSettingsPath);
-                CurrentAppSettings = JsonSerializer.Deserialize<AppSettings>(jsonString);
+                CurrentAppSettings = GenericSerializer.Deserialize<AppSettings>(AppSettingsPath);
                 NugetFolder = CurrentAppSettings.NugetsFolder;
             }
         }
@@ -97,9 +97,7 @@ namespace GetNugets.ViewModels
                 NugetFolder = FolderDialog.SelectedPath;
                 StatusInfo = "Nugets Output Folder: " + NugetFolder;
                 (CurrentAppSettings??=new AppSettings()).NugetsFolder = NugetFolder;
-                JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize<AppSettings>(CurrentAppSettings, options);
-                File.WriteAllText(AppSettingsPath, jsonString);
+                GenericSerializer.Serialize<AppSettings>(CurrentAppSettings, AppSettingsPath);
             }
         }
 
@@ -213,6 +211,22 @@ namespace GetNugets.ViewModels
         public void EscapeKeyPressed()
         {
             IsInProcess = false;
+        }
+
+        [RelayCommand]
+        public void SaveDownloadPackageList()
+        {
+            List<NugetPackageViewModel> completedlist = packages.Where(p => p.Exited == true).ToList();
+            if (completedlist.Count <= 0) return;
+            List<NugetPackage> downloadedPackages = new List<NugetPackage>();
+            foreach (var pkg in completedlist) 
+            {
+                downloadedPackages.Add(new NugetPackage(pkg.Package,pkg.Version));
+            }
+
+            GenericSerializer.Serialize<List<NugetPackage>>(downloadedPackages, NugetFolder + @"\packages.json");
+            StatusInfo = @$"Saved Download Packages to {NugetFolder + @"\packages.json"}";
+
         }
     }
 }
