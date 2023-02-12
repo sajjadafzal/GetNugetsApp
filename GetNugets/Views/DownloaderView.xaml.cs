@@ -10,19 +10,20 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace GetNugets.Views
 {
     /// <summary>
-    /// Interaction logic for MainView.xaml
+    /// Interaction logic for DownloadedView.xaml
     /// </summary>
-    public partial class MainView : Window
+    public partial class DownloaderView : UserControl
     {
-        public MainView()
+        public DownloaderView()
         {
             InitializeComponent();
-            this.DataContext = App.Current.Services.GetService<MainViewModel>();
+            this.DataContext = App.Current.Services.GetService<DownloaderViewModel>();
         }
     }
 }

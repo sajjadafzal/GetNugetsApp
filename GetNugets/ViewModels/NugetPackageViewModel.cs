@@ -19,14 +19,14 @@ namespace GetNugets
         public string Output { get; set; }
 
         [ObservableProperty]
-        private bool exited;               
+        private bool downloaded;               
 
         public NugetPackageViewModel(string package, string version)
         {
             Package = package;
             Version = version;
             Select = true;
-            Exited = false;
+            Downloaded = false;
             Error = string.Empty;
             Output = string.Empty;
         }

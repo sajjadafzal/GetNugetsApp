@@ -1,232 +1,68 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Ookii.Dialogs.Wpf;
+using GetNugets.Messages;
+using GetNugets.Store;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Windows;
-using CommunityToolkit.Mvvm.Input;
-using System.Diagnostics;
-using System.IO;
-using GetNugets.Models;
-using System.Text.Json;
-using GetNugets.Services;
 
 namespace GetNugets.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
-        private string? SolutionFolderPath;
-
-        private AppSettings? CurrentAppSettings;
-        
-        private string CurrentApplicationPath;
-
-        private string AppSettingsPath;
-        public ObservableCollection<NugetPackageViewModel> packages { get; set; }
+        private readonly NavigationService navigationService;
+        private readonly MessengerService messenger;
+        private readonly AppStore appStore;
 
         [ObservableProperty]
-        private bool forceVersion = false;
+        private string? status;
+        public ViewModelBase CurrentViewModel => navigationService.CurrentViewModel;
 
-        [ObservableProperty]
-        private string statusInfo = "-";
-
-        [ObservableProperty]
-        private string outputText = "";
-
-        [ObservableProperty]
-        private bool isVersionChecked = false;
-
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(BrowseCommand))]
-        private string? nugetFolder;
-
-        [ObservableProperty]
-        private NugetPackageViewModel selectedPackage;
-
-        bool IsInProcess = false;
-
-        public MainViewModel()
+        public string? NugetsFolder
         {
-            packages = new ObservableCollection<NugetPackageViewModel>();
-            CurrentApplicationPath = AppDomain.CurrentDomain.BaseDirectory;
-            AppSettingsPath = @$"{CurrentApplicationPath}appsettings.json";
-            if (File.Exists(AppSettingsPath))
+            get => appStore.NugetsFolder;
+            set
             {
-                // appsettings.json exists
-                CurrentAppSettings = GenericSerializer.Deserialize<AppSettings>(AppSettingsPath);
-                NugetFolder = CurrentAppSettings.NugetsFolder;
+                appStore.NugetsFolder = value;
+                OnPropertyChanged(nameof(NugetsFolder));
             }
         }
 
-        [RelayCommand(CanExecute = nameof(CanBrowse))]
-        private void Browse()
+        public MainViewModel(NavigationService navigationService, MessengerService messenger, AppStore appStore)
         {
-            VistaFolderBrowserDialog FolderDialog = new VistaFolderBrowserDialog();
-            FolderDialog.Description = "Select a Solution Folder";
-            FolderDialog.UseDescriptionForTitle = true;
-            if (!VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
-            {
-                MessageBox.Show("Because you are not using Windows Vista or later, the regular folder browser dialog will be used. Please use Windows Vista to see the new dialog.", "Sample folder browser dialog");
-            }
-
-            if ((bool)FolderDialog.ShowDialog()!)
-            {
-                SolutionFolderPath = FolderDialog.SelectedPath;
-                StatusInfo = "Selected Folder: " + SolutionFolderPath;
-            }
+            this.navigationService = navigationService;
+            this.messenger = messenger;
+            this.appStore = appStore;
+            SubscribeMessenger();
         }
 
-        [RelayCommand]
-        private void BrowseNugetFolder()
+        /// <summary>
+        /// Response methon to  <see cref="CurrentViewModelChangedMessage"/> message
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="message"></param>
+        private void OnCurrentViewModelChanged(object recipient, CurrentViewModelChangedMessage message)
         {
-            VistaFolderBrowserDialog FolderDialog = new VistaFolderBrowserDialog();
-            FolderDialog.Description = "Select a Folder for Nuget Packages";            
-            FolderDialog.UseDescriptionForTitle = true;
-            if (!VistaFolderBrowserDialog.IsVistaFolderDialogSupported)
-            {
-                MessageBox.Show("Because you are not using Windows Vista or later, the regular folder browser dialog will be used. Please use Windows Vista to see the new dialog.", "Sample folder browser dialog");
-            }
-
-            if ((bool)FolderDialog.ShowDialog()!)
-            {
-              
-                NugetFolder = FolderDialog.SelectedPath;
-                StatusInfo = "Nugets Output Folder: " + NugetFolder;
-                (CurrentAppSettings??=new AppSettings()).NugetsFolder = NugetFolder;
-                GenericSerializer.Serialize<AppSettings>(CurrentAppSettings, AppSettingsPath);
-            }
+            OnPropertyChanged(nameof(CurrentViewModel));
         }
 
-        private bool CanBrowse()
+        public override void Dispose()
         {
-            return !string.IsNullOrEmpty(NugetFolder);
+            base.Dispose();
+            messenger.UnregisterAll(this);
         }
 
-        [RelayCommand]
-        private void ShowPackages()
+        private void SubscribeMessenger()
         {
-            packages.Clear();
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = "dotnet";
-            startInfo.Arguments = "list package --include-transitive"; //--include-transitive
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.WorkingDirectory = SolutionFolderPath;
-            process.StartInfo = startInfo;
-            process.Start();
-            string commandOutput = process.StandardOutput.ReadToEnd();
-            StatusInfo = process.StandardError.ReadToEnd();
-            outputText = commandOutput;
-
-            string[] commandOutputs = commandOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (string str in commandOutputs)
-            {
-                if (str.Contains(">"))
-                {
-                    string[] subStr = str.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                    NugetPackageViewModel package = new NugetPackageViewModel(subStr[1], subStr[2]);
-                    packages.Add(package);
-                }
-            }
-            
+            messenger.Subscribe<CurrentViewModelChangedMessage>(this, OnCurrentViewModelChanged);
+            messenger.Subscribe<StatusMessage>(this, OnStatusMessageReceive);
         }
 
-        [RelayCommand]
-        private async void GetPackages()
+        private void OnStatusMessageReceive(object recipient, StatusMessage message)
         {
-            IsInProcess = true;
-            foreach (NugetPackageViewModel package in packages)
-            {
-                if (package.Select)
-                {
-                    await GetNugetPackageAsync(package, ForceVersion);
-                    OutputText = package.Output;
-                    StatusInfo = package.Error;
-                }
-                if (!IsInProcess)
-                {
-                    StatusInfo = "Process has been cancelled";
-                    break;
-                }
-            }
-            IsInProcess = false;
-        }
-
-        private async Task GetNugetPackageAsync(NugetPackageViewModel package, bool getVersion)
-        {
-            await Task.Run(() =>
-            {
-                using (Process nugetProcess = new Process())
-                {
-                    ProcessStartInfo nugetStartInfo = new ProcessStartInfo();
-                    nugetStartInfo.FileName = "nuget.exe";
-                    nugetStartInfo.RedirectStandardOutput = true;
-                    nugetStartInfo.RedirectStandardError = true;
-                    nugetStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    nugetStartInfo.CreateNoWindow = true;
-                    nugetProcess.StartInfo = nugetStartInfo;
-                    if (getVersion)
-                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory {NugetFolder}";
-                    else
-                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory {NugetFolder}";
-                    //nugetStartInfo.RedirectStandardOutput = true;
-                    nugetProcess.EnableRaisingEvents = true;
-                    nugetProcess.Exited += (o, e) =>
-                    {
-                        Process? p = o as Process;
-                        if (p.ExitCode == 0)
-                            package.Exited= true;
-                    };
-                    //nugetProcess.OutputDataReceived += (o, e) =>
-                    //{
-                    //    processOutputText.Append("\n" + e.Data);                            
-                    //};
-                    nugetProcess.Start();
-                    //nugetProcess.BeginOutputReadLine();
-                    package.Output = nugetProcess.StandardOutput.ReadToEnd();
-                    package.Error = nugetProcess.StandardError.ReadToEnd();
-                    nugetProcess.WaitForExit();
-                    //Status.Text += " " + nugetProcess.ExitCode.ToString();
-                    //return package;
-                }
-            });
-
-        }
-
-        [RelayCommand]
-        public void PackageSelectionChanged(NugetPackageViewModel newlySelectedPackage)
-        {
-            SelectedPackage= newlySelectedPackage;
-            OutputText = SelectedPackage.Output;
-        }
-
-        [RelayCommand]
-        public void EscapeKeyPressed()
-        {
-            IsInProcess = false;
-        }
-
-        [RelayCommand]
-        public void SaveDownloadPackageList()
-        {
-            List<NugetPackageViewModel> completedlist = packages.Where(p => p.Exited == true).ToList();
-            if (completedlist.Count <= 0) return;
-            List<NugetPackage> downloadedPackages = new List<NugetPackage>();
-            foreach (var pkg in completedlist) 
-            {
-                downloadedPackages.Add(new NugetPackage(pkg.Package,pkg.Version));
-            }
-
-            GenericSerializer.Serialize<List<NugetPackage>>(downloadedPackages, NugetFolder + @"\packages.json");
-            StatusInfo = @$"Saved Download Packages to {NugetFolder + @"\packages.json"}";
-
+            Status = message.Value;
         }
     }
 }

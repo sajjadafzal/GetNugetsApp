@@ -9,6 +9,20 @@ namespace GetNugets.Models
 {
     public class AppSettings
     {
-        public string? NugetsFolder { get; set; }
+        private string? nugetFolder;
+        public string? NugetsFolder
+        {
+            get => nugetFolder;
+            set
+            {
+                nugetFolder = value;
+            }
+        }
+
+
+        public AppSettings()
+        {
+
+        }
     }
 }
