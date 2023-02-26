@@ -27,13 +27,14 @@ namespace GetNugets.ViewModels
         private string CurrentApplicationPath;
 
         private string AppSettingsPath;
-        public ObservableCollection<NugetPackageViewModel> packages { get; set; }
+        //public ObservableCollection<NugetPackageViewModel> packages { get; set; }
 
+        public ObservableCollection<NugetPackageViewModel> packages
+        {
+            get => appStore.packages; set => appStore.packages = value;
+        }
         [ObservableProperty]
         private bool forceVersion = false;
-
-        [ObservableProperty]
-        private string statusInfo = "-";
 
         [ObservableProperty]
         private string outputText = "";
@@ -41,16 +42,18 @@ namespace GetNugets.ViewModels
         [ObservableProperty]
         private bool isVersionChecked = false;
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(BrowseCommand))]
-        private string? nugetFolder;
         /// <summary>
         /// Change will be propagated through messenger's <see cref="NugetsFolderChangedMessage"/> message
         /// </summary>
         public string? NugetsFolder
         {
             get => appStore.NugetsFolder;
-            set => appStore.NugetsFolder = value;
+            set
+            {
+                appStore.NugetsFolder = value;
+                OnPropertyChanged(nameof(NugetsFolder));
+                BrowseCommand.NotifyCanExecuteChanged();
+            }
         }
 
         [ObservableProperty]
@@ -70,20 +73,19 @@ namespace GetNugets.ViewModels
         private void Browse()
         {
 
-            SolutionFolderPath = DirectoryService.Browse("Select a Solution Folder");
-            if (SolutionFolderPath != null) 
-                StatusInfo = "Selected Folder: " + SolutionFolderPath;
+            SolutionFolderPath = DirectoryService.BrowseFolder("Select a Solution Folder");
+            if (SolutionFolderPath != null)
+                UpdateStatus("Selected Folder: " + SolutionFolderPath);
         }
 
         [RelayCommand]
         private void BrowseNugetFolder()
         {
-            NugetsFolder = DirectoryService.Browse("Select a Folder for Nuget Packages");
+            NugetsFolder = DirectoryService.BrowseFolder("Select a Folder for Nuget Packages");
             if (NugetsFolder != null)
             {
-                StatusInfo = "Nugets Output Folder: " + NugetsFolder;
+                UpdateStatus("Nugets Output Folder: " + NugetsFolder);
                 (CurrentAppSettings ??= new AppSettings()).NugetsFolder = NugetsFolder;
-
             }
         }
 
@@ -107,7 +109,7 @@ namespace GetNugets.ViewModels
             process.StartInfo = startInfo;
             process.Start();
             string commandOutput = process.StandardOutput.ReadToEnd();
-            StatusInfo = process.StandardError.ReadToEnd();
+            UpdateStatus(process.StandardError.ReadToEnd());
             outputText = commandOutput;
 
             string[] commandOutputs = commandOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
@@ -134,11 +136,11 @@ namespace GetNugets.ViewModels
                 {
                     await GetNugetPackageAsync(package, ForceVersion);
                     OutputText = package.Output;
-                    StatusInfo = package.Error;
+                    UpdateStatus(package.Error);
                 }
                 if (!IsInProcess)
                 {
-                    StatusInfo = "Process has been cancelled";
+                    UpdateStatus("Process has been cancelled");
                     break;
                 }
             }
@@ -159,9 +161,9 @@ namespace GetNugets.ViewModels
                     nugetStartInfo.CreateNoWindow = true;
                     nugetProcess.StartInfo = nugetStartInfo;
                     if (getVersion)
-                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory {NugetFolder}";
+                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory {NugetsFolder}";
                     else
-                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory {NugetFolder}";
+                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory {NugetsFolder}";
                     //nugetStartInfo.RedirectStandardOutput = true;
                     nugetProcess.EnableRaisingEvents = true;
                     nugetProcess.Exited += (o, e) =>
@@ -199,21 +201,21 @@ namespace GetNugets.ViewModels
             IsInProcess = false;
         }
 
-        [RelayCommand]
-        public void SaveDownloadPackageList()
-        {
-            List<NugetPackageViewModel> completedlist = packages.Where(p => p.Downloaded == true).ToList();
-            if (completedlist.Count <= 0) return;
-            List<NugetPackage> downloadedPackages = new List<NugetPackage>();
-            foreach (var pkg in completedlist)
-            {
-                downloadedPackages.Add(new NugetPackage(pkg.Package, pkg.Version));
-            }
+        //[RelayCommand]
+        //public void SaveDownloadPackageList()
+        //{
+        //    List<NugetPackageViewModel> completedlist = packages.Where(p => p.Downloaded == true).ToList();
+        //    if (completedlist.Count <= 0) return;
+        //    List<NugetPackage> downloadedPackages = new List<NugetPackage>();
+        //    foreach (var pkg in completedlist)
+        //    {
+        //        downloadedPackages.Add(new NugetPackage(pkg.Package, pkg.Version));
+        //    }
 
-            GenericSerializer.Serialize<List<NugetPackage>>(downloadedPackages, NugetsFolder + @"\packages.json");
-            StatusInfo = @$"Saved Download Packages to {NugetsFolder + @"\packages.json"}";
+        //    GenericSerializer.Serialize<List<NugetPackage>>(downloadedPackages, NugetsFolder + @"\packages.json");
+        //    StatusInfo = @$"Saved Download Packages to {NugetsFolder + @"\packages.json"}";
 
-        }
+        //}
 
         private void SubscribeMessenger()
         {
@@ -224,6 +226,12 @@ namespace GetNugets.ViewModels
         {
             OnPropertyChanged(nameof(NugetsFolder));
             BrowseCommand.NotifyCanExecuteChanged(); //Because it depends upon NugetsFolder
+        }
+
+
+        private void UpdateStatus(string message)
+        {
+            messenger.Send(new StatusMessage(message));
         }
     }
 }

@@ -17,20 +17,14 @@
             />
     </UserControl.InputBindings>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
-            <RowDefinition />
-            <RowDefinition Height="30" />
-        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150" />
             <ColumnDefinition Width="4*" />
             <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
-        
+         
 
         <StackPanel
-            Grid.Row="1"
             Grid.Column="0"
             Margin="10,25,0,2">
             <Button
@@ -59,25 +53,15 @@
         </StackPanel>
         <TextBlock
             x:Name="Output"
-            Grid.Row="1"
             Grid.Column="1"
             Margin="5,2,2,2"
             Background="LightSlateGray"
             Foreground="White"
             Text="{Binding OutputText}"
             TextAlignment="Left" Padding="15"/>
-        <TextBlock
-            x:Name="Status"
-            Grid.Row="2"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Margin="5,2,2,2"
-            Background="LightGray"
-            Text="{Binding StatusInfo}"
-            TextAlignment="Left" />
+        
         <ListView
             x:Name="Packagelist"
-            Grid.Row="1"
             Grid.Column="2"
             ItemsSource="{Binding packages}" Margin="15,0,0,0">
             <i:Interaction.Triggers>

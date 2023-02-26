@@ -13,7 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="50" />
+            <RowDefinition x:Name="StatusRow" Height="30" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Menu>
@@ -29,25 +29,30 @@
                     VerticalAlignment="Center"
                     FontSize="14"
                     FontWeight="Bold"
-                    Foreground="Purple"
+                    Foreground="{StaticResource CustomBackground}"
                     Text="Nugets Output Folder: " />
                 <TextBlock
                     Margin="5,0,0,0"
                     Padding="10"
                     VerticalAlignment="Center"
-                    Background="Purple"
+                    Background="{StaticResource CustomBackground}"
                     FontSize="14"
                     FontWeight="Bold"
                     Foreground="White"
-                    Text="{Binding NugetFolder}" />
+                    Text="{Binding NugetsFolder}" />
             </StackPanel>
         </StackPanel>
+        <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
         <StackPanel Grid.Row="2">
             <TextBlock
-                Margin="5,2,2,2"
-                Background="LightGray"
-                Text="{Binding Status}" />
+                Padding="10,5"
+                Height="30"
+                Background="{StaticResource CustomBackground}"
+                Foreground="White"
+                Text="{Binding Status}"
+                FontWeight="Bold"
+                TextAlignment="Left"
+                VerticalAlignment="Bottom"/>
         </StackPanel>
-        <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
     </Grid>
 </Window>

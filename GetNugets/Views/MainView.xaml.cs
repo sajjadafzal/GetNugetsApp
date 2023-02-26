@@ -21,8 +21,7 @@ namespace GetNugets.Views
     {
         public MainView()
         {
-            InitializeComponent();
-            this.DataContext = App.Current.Services.GetService<MainViewModel>();
+            InitializeComponent();            
         }
     }
 }

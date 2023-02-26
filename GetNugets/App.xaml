@@ -19,6 +19,7 @@
             <DataTemplate DataType="{x:Type viewmodels:PackagesViewModel}">
                 <views:PackagesView/>
             </DataTemplate>
+            <SolidColorBrush x:Key="CustomBackground" Color="#714cfe"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

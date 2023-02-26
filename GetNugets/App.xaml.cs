@@ -35,6 +35,7 @@ namespace GetNugets
         {
             base.OnStartup(e);            
             window = Services.GetService<MainView>();
+            window.DataContext = Services.GetService<MainViewModel>();
             window.Show();
         }
 

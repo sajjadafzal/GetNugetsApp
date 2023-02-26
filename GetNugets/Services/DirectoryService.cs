@@ -9,7 +9,7 @@ namespace GetNugets.Services
 {
     public static class DirectoryService
     {
-        public static string? Browse(string promptMessage)
+        public static string? BrowseFolder(string promptMessage)
         {
             string? path = null;
             VistaFolderBrowserDialog FolderDialog = new VistaFolderBrowserDialog();
