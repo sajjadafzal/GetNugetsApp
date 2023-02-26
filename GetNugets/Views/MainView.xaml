@@ -24,7 +24,7 @@
                     <MenuItem Command="{Binding SaveDownloadPackageListCommand}" Header="Save Downloaded Packages List" />
                 </MenuItem>
             </Menu>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Margin="30,0">
                 <TextBlock
                     VerticalAlignment="Center"
                     FontSize="14"

@@ -55,7 +55,7 @@
             x:Name="Output"
             Grid.Column="1"
             Margin="5,2,2,2"
-            Background="LightSlateGray"
+            Background="Black"
             Foreground="White"
             Text="{Binding OutputText}"
             TextAlignment="Left" Padding="15"/>
