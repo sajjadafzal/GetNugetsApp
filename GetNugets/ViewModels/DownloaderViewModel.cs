@@ -31,8 +31,9 @@ namespace GetNugets.ViewModels
 
         public ObservableCollection<NugetPackageViewModel> packages
         {
-            get => appStore.packages; set => appStore.packages = value;
+            get => appStore.Packages; set => appStore.Packages = value;
         }
+
         [ObservableProperty]
         private bool forceVersion = false;
 

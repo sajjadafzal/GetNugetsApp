@@ -18,8 +18,11 @@ namespace GetNugets.Extensions
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<DownloaderView>();
             services.AddSingleton<DownloaderViewModel>();
+
             services.AddTransient<PackagesView>();
-            services.AddTransient<PackagesViewModel>();                 
+            services.AddTransient<PackagesViewModel>();  
+            services.AddTransient<ExistingDownloadsView>();
+            services.AddTransient<ExistingDownloadsViewModel>();
 
             return services;
         }

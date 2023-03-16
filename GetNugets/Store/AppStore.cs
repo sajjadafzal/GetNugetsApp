@@ -18,6 +18,7 @@ namespace GetNugets.Store
             get => appSettings.NugetsFolder;
             set
             {
+                if (appSettings.NugetsFolder == value) return;
                 appSettings.NugetsFolder = value;
                 GenericSerializer.Serialize<AppSettings>(appSettings, AppSettingsPath);
             }
@@ -25,7 +26,9 @@ namespace GetNugets.Store
 
         AppSettings appSettings { get; set; }
 
-        public ObservableCollection<NugetPackageViewModel> packages { get; set; }
+        public ObservableCollection<NugetPackageViewModel> Packages { get; set; }
+
+        public ObservableCollection<NugetPackageViewModel> ExistingPackages { get; set; }
 
         public AppStore()
         {          

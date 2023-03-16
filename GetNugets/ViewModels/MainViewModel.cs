@@ -66,7 +66,7 @@ namespace GetNugets.ViewModels
         [RelayCommand]
         public void SaveDownloadPackageList()
         {
-            List<NugetPackageViewModel> completedlist = appStore.packages.Where(p => p.Downloaded == true).ToList();
+            List<NugetPackageViewModel> completedlist = appStore.Packages.Where(p => p.Downloaded == true).ToList();
             if (completedlist.Count <= 0) return;
             List<NugetPackage> downloadedPackages = new List<NugetPackage>();
             foreach (var pkg in completedlist)
@@ -78,6 +78,12 @@ namespace GetNugets.ViewModels
             Status = @$"Saved Download Packages to {NugetsFolder + @"\packages.json"}";
 
         }
+
+        public void ExistingDownloadView()
+        {
+            navigationService.NavigateTo(App.Current.Services.GetService<ExistingDownloadsViewModel>());
+        }
+
         public override void Dispose()
         {
             base.Dispose();

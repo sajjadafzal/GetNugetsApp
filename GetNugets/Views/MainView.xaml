@@ -23,6 +23,9 @@
                 <MenuItem Header="Actions">
                     <MenuItem Command="{Binding SaveDownloadPackageListCommand}" Header="Save Downloaded Packages List" />
                 </MenuItem>
+                <MenuItem Header="View">
+                    <MenuItem Command="{Binding ExistingDownloadViewCommand}" Header="Existing Downloads" />
+                </MenuItem>
             </Menu>
             <StackPanel Orientation="Horizontal" Margin="30,0">
                 <TextBlock
