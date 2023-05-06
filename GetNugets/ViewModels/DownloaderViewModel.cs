@@ -147,6 +147,7 @@ namespace GetNugets.ViewModels
             }
             IsInProcess = false;
         }
+        
 
         private async Task GetNugetPackageAsync(NugetPackageViewModel package, bool getVersion)
         {
@@ -189,6 +190,7 @@ namespace GetNugets.ViewModels
 
         }
 
+        
         [RelayCommand]
         public void PackageSelectionChanged(NugetPackageViewModel newlySelectedPackage)
         {
