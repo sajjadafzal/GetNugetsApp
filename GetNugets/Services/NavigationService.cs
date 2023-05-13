@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GetNugets.Messages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace GetNugets.Services
                 if (object.Equals(_CurrentViewModel, value) || value == null) return;
                 _CurrentViewModel?.Dispose();
                 _CurrentViewModel = value;
-                messenger.Send(CurrentViewModel);
+                messenger.Send(new CurrentViewModelChangedMessage());
             }
         }
         

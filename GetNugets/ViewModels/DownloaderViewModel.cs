@@ -80,18 +80,7 @@ namespace GetNugets.ViewModels
                 UpdateStatus("Selected Folder: " + SolutionFolderPath);
                 ShowPackages();
             }
-        }
-
-        [RelayCommand]
-        private void BrowseNugetFolder()
-        {
-            NugetsFolder = DirectoryService.BrowseFolder("Select a Folder for Nuget Packages");
-            if (NugetsFolder != null)
-            {
-                UpdateStatus("Nugets Output Folder: " + NugetsFolder);
-                (CurrentAppSettings ??= new AppSettings()).NugetsFolder = NugetsFolder;
-            }
-        }
+        }       
 
         private bool CanBrowse()
         {
@@ -234,6 +223,12 @@ namespace GetNugets.ViewModels
             BrowseCommand.NotifyCanExecuteChanged(); //Because it depends upon NugetsFolder
         }
 
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            messenger.UnregisterAll(this);
+        }
 
         private void UpdateStatus(string message)
         {

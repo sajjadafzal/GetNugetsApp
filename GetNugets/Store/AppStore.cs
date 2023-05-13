@@ -15,6 +15,8 @@ namespace GetNugets.Store
     {
         public readonly string AppSettingsPath = @$"{AppDomain.CurrentDomain.BaseDirectory}appsettings.json";
         private MessengerService messenger;
+        private ObservableCollection<NugetPackageViewModel> existingPackages;
+
         /// <summary>
         /// Stores folder path to store downloded nugets. If appsettings.json exist then this
         /// variable is loaded from appsettings.json.
@@ -39,7 +41,19 @@ namespace GetNugets.Store
 
         public ObservableCollection<NugetPackageViewModel> Packages { get; set; }
 
-        public ObservableCollection<NugetPackageViewModel> ExistingPackages { get; set; }
+        /// <summary>
+        /// Changing this property will send a <see cref="ExistingPackagesChangedMessage"/> message.
+        /// </summary>
+        public ObservableCollection<NugetPackageViewModel> ExistingPackages 
+        { 
+            get => existingPackages;
+            set 
+            { 
+                if (existingPackages == value) return;
+                existingPackages = value;
+                messenger.Send(new ExistingPackagesChangedMessage());
+            }
+        }
 
         public AppStore(MessengerService messenger)
         {
