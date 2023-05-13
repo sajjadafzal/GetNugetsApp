@@ -76,7 +76,10 @@ namespace GetNugets.ViewModels
 
             SolutionFolderPath = DirectoryService.BrowseFolder("Select a Solution Folder");
             if (SolutionFolderPath != null)
+            {
                 UpdateStatus("Selected Folder: " + SolutionFolderPath);
+                ShowPackages();
+            }
         }
 
         [RelayCommand]
@@ -156,16 +159,16 @@ namespace GetNugets.ViewModels
                 using (Process nugetProcess = new Process())
                 {
                     ProcessStartInfo nugetStartInfo = new ProcessStartInfo();
-                    nugetStartInfo.FileName = "nuget.exe";
+                    nugetStartInfo.FileName = "nuget.exe";                   
                     nugetStartInfo.RedirectStandardOutput = true;
                     nugetStartInfo.RedirectStandardError = true;
                     nugetStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     nugetStartInfo.CreateNoWindow = true;
                     nugetProcess.StartInfo = nugetStartInfo;
                     if (getVersion)
-                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory {NugetsFolder}";
+                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory ""{NugetsFolder}""";
                     else
-                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory {NugetsFolder}";
+                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory ""{NugetsFolder}""";
                     //nugetStartInfo.RedirectStandardOutput = true;
                     nugetProcess.EnableRaisingEvents = true;
                     nugetProcess.Exited += (o, e) =>

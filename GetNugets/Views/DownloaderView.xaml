@@ -33,12 +33,12 @@
                 Command="{Binding BrowseCommand}"
                 Content="Browse Sln"
                 FontSize="12" />
-            <Button
+            <!--<Button
                 x:Name="btnShowPackages"
                 Margin="5,2"
                 Command="{Binding ShowPackagesCommand}"
                 Content="Get Packages Info"
-                FontSize="12" />
+                FontSize="12" />-->
             <Button
                 x:Name="btnGetPackages"
                 Margin="5,2"
@@ -51,13 +51,13 @@
                 Content="Version"
                 IsChecked="{Binding IsVersionChecked}" />
         </StackPanel>
-        <TextBlock
+        <TextBox
             x:Name="Output"
             Grid.Column="1"
             Margin="5,2,2,2"
             Background="Black"
             Foreground="White"
-            Text="{Binding OutputText}"
+            Text="{Binding OutputText, Mode=OneWay}"
             TextAlignment="Left" Padding="15"/>
         
         <ListView
