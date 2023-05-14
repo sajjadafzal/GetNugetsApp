@@ -5,24 +5,26 @@
     xmlns:local="clr-namespace:GetNugets"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:viewmodels="clr-namespace:GetNugets.ViewModels"
-    xmlns:views="clr-namespace:GetNugets.Views"
-    >
+    xmlns:views="clr-namespace:GetNugets.Views">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <materialDesign:BundledTheme
+                    BaseTheme="Light"
+                    PrimaryColor="DeepPurple"
+                    SecondaryColor="Lime" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate DataType="{x:Type viewmodels:DownloaderViewModel}">
-                <views:DownloaderView/>
+                <views:DownloaderView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewmodels:PackagesViewModel}">
-                <views:PackagesView/>
+                <views:PackagesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewmodels:ExistingDownloadsViewModel}">
-                <views:ExistingDownloadsView/>
+                <views:ExistingDownloadsView />
             </DataTemplate>
-            <SolidColorBrush x:Key="CustomBackground" Color="#714cfe"/>
+            <SolidColorBrush x:Key="CustomBackground" Color="#714cfe" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

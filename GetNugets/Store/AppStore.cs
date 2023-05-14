@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,6 +31,8 @@ namespace GetNugets.Store
                 appSettings.NugetsFolder = value;
                 messenger.Send<NugetsFolderChangedMessage>();
                 GenericSerializer.Serialize<AppSettings>(appSettings, AppSettingsPath);
+
+                LoadExistingPackages();
             }
         }
 
@@ -62,8 +65,26 @@ namespace GetNugets.Store
             {
                 // appsettings.json exists
                 appSettings = GenericSerializer.Deserialize<AppSettings>(AppSettingsPath);
+                LoadExistingPackages();
             }
             else appSettings = new AppSettings();
+        }
+
+        public void LoadExistingPackages()
+        {
+            if (!string.IsNullOrEmpty(NugetsFolder))
+            {
+                string packagePath = Path.Combine(NugetsFolder!, "packages.json");
+
+                if (File.Exists(packagePath))
+                {
+                    ExistingPackages = GenericSerializer.Deserialize<ObservableCollection<NugetPackageViewModel>>(packagePath);
+                }
+                else
+                {
+                    ExistingPackages = new ObservableCollection<NugetPackageViewModel>();
+                }
+            }
         }
     }
 }

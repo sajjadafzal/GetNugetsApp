@@ -63,7 +63,7 @@
         <ListView
             x:Name="Packagelist"
             Grid.Column="2"
-            ItemsSource="{Binding packages}" Margin="15,0,0,0">
+            ItemsSource="{Binding ListSource}" Margin="15,0,0,0">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding PackageSelectionChangedCommand}" CommandParameter="{Binding ElementName=Packagelist, Path=SelectedItem}"/>

@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace GetNugets.ViewModels
 {
@@ -33,6 +34,23 @@ namespace GetNugets.ViewModels
         {
             get => appStore.Packages; set => appStore.Packages = value;
         }
+
+        public ObservableCollection<NugetPackageViewModel> existingPackages
+        {
+            get => appStore.ExistingPackages; set => appStore.ExistingPackages = value;
+        }
+
+        
+        private ObservableCollection<NugetPackageViewModel> SolutionPackages;
+        
+
+        private ObservableCollection<NugetPackageViewModel> listSource;
+
+        public ObservableCollection<NugetPackageViewModel> ListSource
+        {
+            get => listSource; set => SetProperty(ref listSource, value);
+        }
+
 
         [ObservableProperty]
         private bool forceVersion = false;
@@ -117,13 +135,32 @@ namespace GetNugets.ViewModels
                 }
             }
 
+            SolutionPackages = new ObservableCollection<NugetPackageViewModel>();       
+
+            foreach(var pkg in packages)
+            {
+                bool found = false;
+
+                if (existingPackages != null)
+                    foreach (var expkg in existingPackages)
+                    {
+                        if (pkg.Package == expkg.Package && pkg.Version == expkg.Version) found = true;
+                    }
+                
+                if (!found) SolutionPackages.Add(pkg);
+
+            }
+
+            ListSource = SolutionPackages;
+            
+
         }
 
         [RelayCommand]
         private async void GetPackages()
         {
             IsInProcess = true;
-            foreach (NugetPackageViewModel package in packages)
+            foreach (NugetPackageViewModel package in ListSource)
             {
                 if (package.Select)
                 {
@@ -138,6 +175,12 @@ namespace GetNugets.ViewModels
                 }
             }
             IsInProcess = false;
+
+            var downloadedPackages = listSource.Where(pkg => pkg.Downloaded);
+            foreach( var downloadedPackage in downloadedPackages)
+            {
+                existingPackages.Add(downloadedPackage);
+            }            
         }
         
 

@@ -29,12 +29,8 @@ namespace GetNugets.ViewModels
         public string? NugetsFolder
         {
             get => appStore.NugetsFolder;
-            set
-            {
-                appStore.NugetsFolder = value;
-                OnPropertyChanged(nameof(NugetsFolder));
-            }
-        }
+            set => appStore.NugetsFolder = value;
+        }        
 
         public MainViewModel(NavigationService navigationService, MessengerService messenger, AppStore appStore)
         {
@@ -45,7 +41,7 @@ namespace GetNugets.ViewModels
         }
 
         /// <summary>
-        /// Response methon to  <see cref="CurrentViewModelChangedMessage"/> message
+        /// Response method to  <see cref="CurrentViewModelChangedMessage"/> message
         /// </summary>
         /// <param name="recipient"></param>
         /// <param name="message"></param>
@@ -62,18 +58,7 @@ namespace GetNugets.ViewModels
             if ( !string.IsNullOrEmpty(nuget_folder))
             {
                 NugetsFolder = nuget_folder;
-                Status = "Nugets Output Folder: " + NugetsFolder;
-                string packagePath = Path.Combine(NugetsFolder, "packages.json");
-                //messenger.Send(new StatusMessage(packagePath));
-
-                if (File.Exists(packagePath))
-                {
-                    appStore.ExistingPackages = GenericSerializer.Deserialize<ObservableCollection<NugetPackageViewModel>>(packagePath); 
-                }
-                else
-                {
-                    appStore.ExistingPackages = new ObservableCollection<NugetPackageViewModel>();
-                }                
+                Status = "Nugets Output Folder: " + NugetsFolder;          
             }
         }
 
@@ -106,8 +91,24 @@ namespace GetNugets.ViewModels
             messenger.Subscribe<CurrentViewModelChangedMessage>(this, OnCurrentViewModelChanged);
             messenger.Subscribe<StatusMessage>(this, OnStatusMessageReceive);
             messenger.Subscribe<SavePackageJsonMessage>(this, SaveDownloadedPackagesJson);
+            messenger.Subscribe<NugetsFolderChangedMessage>(this, NugetFolderChangeMessageReceive);
         }
 
+        /// <summary>
+        /// Response method to <see cref="NugetsFolderChangedMessage"/>.
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="message"></param>
+        private void NugetFolderChangeMessageReceive(object recipient, NugetsFolderChangedMessage message)
+        {
+            OnPropertyChanged(nameof(NugetsFolder));
+        }
+
+        /// <summary>
+        /// Response method to <see cref="SavePackageJsonMessage"/>.
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="message"></param>
         private void SaveDownloadedPackagesJson(object recipient, SavePackageJsonMessage message)
         {
             SaveDownloadedPackagesToJson();
@@ -126,6 +127,8 @@ namespace GetNugets.ViewModels
             GenericSerializer.Serialize<List<NugetPackage>>(downloadedPackages, NugetsFolder + @"\packages.json");
             Status = @$"Saved Download Packages to {NugetsFolder + @"\packages.json"}";
         }
+
+
         private void OnStatusMessageReceive(object recipient, StatusMessage message)
         {
             Status = message.Value;
