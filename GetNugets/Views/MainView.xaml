@@ -19,6 +19,8 @@
             <Menu>
                 <MenuItem Header="File">
                     <MenuItem Command="{Binding BrowseNugetFolderCommand}" Header="Select Nuget Folder" />
+                    <Separator />
+                    <MenuItem Command="{Binding QuitApplicationCommand}" Header="Exit" />
                 </MenuItem>
                 <MenuItem Header="Actions">
                     <MenuItem Command="{Binding SaveDownloadPackageListCommand}" Header="Save Downloaded Packages List" />

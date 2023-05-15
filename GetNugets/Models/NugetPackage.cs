@@ -14,6 +14,7 @@ public partial class NugetPackage
     public string Package { get; set; }
     public string Version { get; set; }
 
+    public string FullPackage { get => Package + "." + Version; }
     public NugetPackage()
     {
         Package = string.Empty;

@@ -30,10 +30,7 @@ namespace GetNugets.ViewModels
         private string AppSettingsPath;
         //public ObservableCollection<NugetPackageViewModel> packages { get; set; }
 
-        public ObservableCollection<NugetPackageViewModel> packages
-        {
-            get => appStore.Packages; set => appStore.Packages = value;
-        }
+        public List<NugetPackageViewModel> packages { get; set; }        
 
         public ObservableCollection<NugetPackageViewModel> existingPackages
         {
@@ -85,7 +82,7 @@ namespace GetNugets.ViewModels
             this.messenger = messenger;
             this.appStore = appStore;
             SubscribeMessenger();
-            packages = new ObservableCollection<NugetPackageViewModel>();    
+            packages = new List<NugetPackageViewModel>();    
         }
 
         [RelayCommand(CanExecute = nameof(CanBrowse))]
@@ -152,6 +149,7 @@ namespace GetNugets.ViewModels
             }
 
             ListSource = SolutionPackages;
+            if (SolutionPackages.Count <= 0) { UpdateStatus($"No new package found in the solution\"{SolutionFolderPath}\"" ); }
             
 
         }
@@ -164,23 +162,31 @@ namespace GetNugets.ViewModels
             {
                 if (package.Select)
                 {
+                    UpdateStatus($"Downloading Package: {package.FullPackage}");
                     await GetNugetPackageAsync(package, ForceVersion);
                     OutputText = package.Output;
                     UpdateStatus(package.Error);
                 }
                 if (!IsInProcess)
                 {
-                    UpdateStatus("Process has been cancelled");
+                    OutputText +=  Environment.NewLine + "Process has been cancelled";
                     break;
                 }
             }
             IsInProcess = false;
 
+
+            bool saveListToDisk = false;
             var downloadedPackages = listSource.Where(pkg => pkg.Downloaded);
             foreach( var downloadedPackage in downloadedPackages)
             {
                 existingPackages.Add(downloadedPackage);
-            }            
+                saveListToDisk = true;
+            }   
+
+            if (saveListToDisk)  messenger.Send(new SavePackageJsonMessage());
+            
+
         }
         
 

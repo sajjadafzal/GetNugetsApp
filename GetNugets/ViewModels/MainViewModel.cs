@@ -80,6 +80,11 @@ namespace GetNugets.ViewModels
             navigationService.NavigateTo(App.Current.Services.GetService<DownloaderViewModel>());
         }
 
+        [RelayCommand]
+        public void QuitApplication()
+        {
+            App.Current.Shutdown();
+        }
         public override void Dispose()
         {
             base.Dispose();
@@ -116,7 +121,7 @@ namespace GetNugets.ViewModels
 
         private void SaveDownloadedPackagesToJson()
         {
-            List<NugetPackageViewModel> completedlist = appStore.Packages.Where(p => p.Downloaded == true).ToList();
+            List<NugetPackageViewModel> completedlist = appStore.ExistingPackages.ToList();
             if (completedlist.Count <= 0) return;
             List<NugetPackage> downloadedPackages = new List<NugetPackage>();
             foreach (var pkg in completedlist)

@@ -13,6 +13,9 @@ namespace GetNugets
     {
         public string Package { get; set; }
         public string Version { get; set; }
+        public string FullPackage { get => Package + "." + Version; }
+
+
         public bool Select { get; set; }
 
         public string Error { get; set; }
