@@ -25,5 +25,6 @@ namespace GetNugets.Views
             InitializeComponent();
             this.DataContext = App.Current.Services.GetService<DownloaderViewModel>();
         }
+
     }
 }

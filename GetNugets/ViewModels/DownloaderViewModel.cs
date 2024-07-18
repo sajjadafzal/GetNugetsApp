@@ -6,6 +6,7 @@ using GetNugets.Services;
 using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -57,6 +58,9 @@ namespace GetNugets.ViewModels
 
         [ObservableProperty]
         private bool isVersionChecked = false;
+
+        [ObservableProperty]
+        private bool isPreReleaseChecked = false;
 
         /// <summary>
         /// Change will be propagated through messenger's <see cref="NugetsFolderChangedMessage"/> message
@@ -132,8 +136,8 @@ namespace GetNugets.ViewModels
                 }
             }
 
-            SolutionPackages = new ObservableCollection<NugetPackageViewModel>();       
-
+            SolutionPackages = new ObservableCollection<NugetPackageViewModel>();
+            existingPackages = new ObservableCollection<NugetPackageViewModel>(existingPackages.OrderBy(p => p.Package));
             foreach(var pkg in packages)
             {
                 bool found = false;
@@ -141,7 +145,8 @@ namespace GetNugets.ViewModels
                 if (existingPackages != null)
                     foreach (var expkg in existingPackages)
                     {
-                        if (pkg.Package == expkg.Package && pkg.Version == expkg.Version) found = true;
+                        if (pkg.Package == expkg.Package && pkg.Version == expkg.Version) 
+                            found = true;
                     }
                 
                 if (!found) SolutionPackages.Add(pkg);
@@ -163,7 +168,7 @@ namespace GetNugets.ViewModels
                 if (package.Select)
                 {
                     UpdateStatus($"Downloading Package: {package.FullPackage}");
-                    await GetNugetPackageAsync(package, ForceVersion);
+                    await GetNugetPackageAsync(package, IsVersionChecked, IsPreReleaseChecked);
                     OutputText = package.Output;
                     UpdateStatus(package.Error);
                 }
@@ -190,7 +195,7 @@ namespace GetNugets.ViewModels
         }
         
 
-        private async Task GetNugetPackageAsync(NugetPackageViewModel package, bool getVersion)
+        private async Task GetNugetPackageAsync(NugetPackageViewModel package, bool getVersion, bool IncludePrerelease)
         {
             await Task.Run(() =>
             {
@@ -203,10 +208,17 @@ namespace GetNugets.ViewModels
                     nugetStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     nugetStartInfo.CreateNoWindow = true;
                     nugetProcess.StartInfo = nugetStartInfo;
+
+                    string arguments = @$"install {package.Package}";
                     if (getVersion)
-                        nugetStartInfo.Arguments = @$"install {package.Package} -Version {package.Version} -OutputDirectory ""{NugetsFolder}""";
-                    else
-                        nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory ""{NugetsFolder}""";
+                        arguments += @$" -Version {package.Version}"; // "-OutputDirectory ""{NugetsFolder}""";
+                    if (IncludePrerelease)
+                        arguments += @$" --PreRelease";
+                    //else
+                    //    nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory ""{NugetsFolder}""";
+
+                    nugetStartInfo.Arguments = arguments + @$" -OutputDirectory ""{NugetsFolder}""";
+
                     //nugetStartInfo.RedirectStandardOutput = true;
                     nugetProcess.EnableRaisingEvents = true;
                     nugetProcess.Exited += (o, e) =>

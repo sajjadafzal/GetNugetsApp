@@ -11,10 +11,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.InputBindings>
-        <KeyBinding
-            Key="Esc"
-            Command="{Binding EscapeKeyPressedCommand}"
-            />
+        <KeyBinding Key="Esc" Command="{Binding EscapeKeyPressedCommand}" />
     </UserControl.InputBindings>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -22,11 +19,9 @@
             <ColumnDefinition Width="4*" />
             <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
-         
 
-        <StackPanel
-            Grid.Column="0"
-            Margin="10,25,0,2">
+
+        <StackPanel Grid.Column="0" Margin="10,25,0,2">
             <Button
                 x:Name="btnBrowse"
                 Margin="5,2"
@@ -50,28 +45,35 @@
                 Margin="5,2"
                 Content="Version"
                 IsChecked="{Binding IsVersionChecked}" />
+            <CheckBox
+                x:Name="ChBoxPreRelease"
+                Margin="5,2"
+                Content="Pre Release"
+                IsChecked="{Binding IsPreReleaseChecked}" />
         </StackPanel>
         <TextBox
             x:Name="Output"
             Grid.Column="1"
             Margin="5,2,2,2"
+            Padding="15"
             Background="Black"
             Foreground="White"
             Text="{Binding OutputText, Mode=OneWay}"
-            TextAlignment="Left" Padding="15"/>
-        
+            TextAlignment="Left" />
+
         <ListView
             x:Name="Packagelist"
             Grid.Column="2"
-            ItemsSource="{Binding ListSource}" Margin="15,0,0,0">
+            Margin="15,0,0,0"
+            ItemsSource="{Binding ListSource}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding PackageSelectionChangedCommand}" CommandParameter="{Binding ElementName=Packagelist, Path=SelectedItem}"/>
+                    <i:InvokeCommandAction Command="{Binding PackageSelectionChangedCommand}" CommandParameter="{Binding ElementName=Packagelist, Path=SelectedItem}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn DisplayMemberBinding="{Binding Package}" Header="Package Name"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Package}" Header="Package Name" />
                     <GridViewColumn
                         Width="150"
                         DisplayMemberBinding="{Binding Version}"
@@ -82,8 +84,8 @@
                                 <CheckBox
                                     MinWidth="50"
                                     Margin="5,0"
-                                    IsChecked="{Binding Select, Mode=TwoWay}" 
-                                    HorizontalAlignment="Center"/>
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding Select, Mode=TwoWay}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -93,8 +95,8 @@
                                 <CheckBox
                                     MinWidth="50"
                                     Margin="5,0"
-                                    IsChecked="{Binding Downloaded, Mode=TwoWay}" 
-                                    HorizontalAlignment="Center"/>
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding Downloaded, Mode=TwoWay}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
