@@ -217,7 +217,7 @@ namespace GetNugets.ViewModels
                     //else
                     //    nugetStartInfo.Arguments = @$"install {package.Package} -OutputDirectory ""{NugetsFolder}""";
 
-                    nugetStartInfo.Arguments = arguments + @$" -OutputDirectory ""{NugetsFolder}""";
+                    nugetStartInfo.Arguments = arguments + @$" -OutputDirectory ""{NugetsFolder}\NP""";
 
                     //nugetStartInfo.RedirectStandardOutput = true;
                     nugetProcess.EnableRaisingEvents = true;
